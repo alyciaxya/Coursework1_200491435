@@ -1,0 +1,81 @@
+---
+title: "MTH6139 Time Series"
+author: 200491435 Alycia Yeung
+- name: Coursework1
+date: "March 2024"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+  pdf_document:
+    toc: true
+subtitle: Coursework 1
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Introduction
+
+Meta has implemented a forecasting system available in R and Python which forecasts time series data with Prophet involving the fitting of non-linear trends with annual, quarterly, monthly, weekly, and multiple seasonality components using an additive model.
+
+The Prophet forecasting model is designed to have intuitive parameters that can be adjusted without knowing the details of the underlying model, manage outliers, missing data or trend changes, which provides expert analysts with many possibilities to effectively modify and fine-tune forecasts to their own specific requirements. In R, we implement the normal model fitting API shown below:
+
+## 2. Coursework Description
+
+The Scripps CO2 program was initiated in 1957 by Charles David Keeling at La Jolla, California and at the south pole to measure CO2 and chemical species. From 1958, records of atmospheric carbon dioxide were taken in Mauna Loa Observatory, Hawaii, due to the environmental concern of the increasing amount of CO2 in the atmosphere from the burning of fossil fuel combustion, which were gradually extended to other stations from the Arctic to Antarctica. The programme is run by Scripps Institution of Oceanography and is responsible for the Mauna Loa Record.
+
+![](images/co2_stations_map.png) *Locations of Carbon dioxide sampling stations*
+
+### 2.1 The data
+
+The Co2 dataset measures the atmospheric concentrations of carbon dioxide in a time series of 468 observations; monthly from 1959 to 1997 providing insights to long-term trends which allows analysts to easily identify outliers. The values for February, March and April of 1964 were missing and have been obtained by interpolating linearly between the values for January and May of 1964.
+
+```{r eval=FALSE, include=TRUE}
+co2.df = data.frame(ds=zoo::as.yearmon(time(co2)), y=co2)
+modelwithnoseasonality = prophet::prophet(co2.df)
+future = prophet::make_future_dataframe(modelwithnoseasonality, periods=8, freq="month")
+predict = predict(modelwithnoseasonality, future)
+```
+
+Here, we have created a data frame 'co2.df' containing the Co2 data set with a vector of dates from the 'zoo' library and initialized it to fit the Prophet model. And thus used the R code `'future = prophet::make_future_dataframe(modelwithnoseasonality, periods=8, freq="month")'` function to create future predictions with the fitted model, where 8 indicates the number of periods ahead with a monthly frequency to predict future forecasting. By default it will also include the historical dates so we can evaluate in-sample fit.
+
+For curious students, you can consider different time-frames and multiple forecasts, using different configurations, data ranges or even larger data sets to compare with the co2 data set used in this project. For example, comparing the isotopic data tends at Mauna Loa Observatory with the carbon dioxide data or comparing the datas between different stations as the altitude and hemispheres will influence the concentration trends. However, we will only focus on the co2 data in this project.
+
+### 2.2 Visualizing the data
+
+Plotting the model allows us to visualize the forecast and see the if there are any patterns, trend changes or outliers in the data. Whilst allowing experts to modify and fine-tune forecasts to their own specific requirements to make it easier for others to compare the different model specifications.
+
+```{r eval=FALSE, include=TRUE}
+plot(modelwithnoseasonality,predict)
+```
+
+The modern record of atmospheric carbon dioxide levels began with observations recorded at Mauna Loa Observatory in Hawaii. This graph shows the station's monthly average carbon dioxide measurements since 1958 in parts per million (ppm).
+
+The data provides substantial evidence that there is more than 35% increase in the amount of carbon dioxide compared to before the Industrial Revolution, and a rise of 6% in the last 19 years alone. The plot below shows the effect of rising. co2 on the climate has a constant relationship with fossil-fuel burning and it is evident from the fit of the curve that around 50%-60% of the fossil-fuel emissions remain airborne. The graph also illustrates that the burning of fossil fuel fits the curvature in the records, sloping upwards less rapidly at the beginning, and more rapidly nearer to the end of 1997.
+
+Therefore, unless serious actions are taken place to reduce the dependence on fossil fuels, it is clear that our climate will continue to change rapidly at the rate the concentration of co2 is increasing in the atmosphere, to the point the Earth may not be inhabitable for human beings. ![](images/co2.month.png) *Mauna Loa Observatory, Hawaii. The sawtooth fluctuations illustrate the monthly average of carbon dioxide concentration in the atmosphere. Data from the Scripps CO2 programme.*
+
+```{r eval=FALSE, include=TRUE}
+prophet_plot_components(modelwithnoseasonality,predict)
+```
+
+The `'prophet_plot_components(modelwithnoseasonality,predict)'` function helps us to see the forecast broken down into trend and yearly seasonality.
+
+From the graphs below, we can see that the general trend of concentrations of carbon dioxide is rapidly increasing. Since the industrial times, we have raised the atmospheric carbon dioxide concentration by 50%, meaning that the amount of carbon dioxide is now 150% of its value in 1750. It is important to note that these measurements are from the mid-troposphere, the layer of the Earth's atmosphere that is 8 to 12 kilometers above the ground. Thus, this data provides us with great insight in the significant rise in atmospheric carbon dioxide concentrations which also highlights the impact of 'human activities' on the Earth.
+
+If we continue to look closely at the carbon dioxide measurements in the second graph stated "day of year" in the x-axis and "yearly" in the y-axis, we see a series of wiggles throughout the year. Although the general trend of carbon dioxide is increasing each year, there is a short-term cycle visible in the second graph showing ups and downs. We can convey the graph by stating the rise and all of carbon dioxide levels is caused by seasonal cycles in photosynthesis. In autumn, plants usually stops photosynthesising and dies which lowers the carbon dioxide levels in the atmosphere with the lowest months between September and October 2023. In contrary, once it hits spring, plants and flowers start to grow again around march which explains the significant increase to greater than +2.5. At Mauna Loa, the highest monthly value occurred in May 2023.
+
+Although natural factors such as seasons may impact the levels of carbon dioxide, at a larger scale, the increase in trend line of carbon dioxide emissions into the atmosphere over the years is primarily caused from burning fossil fuels.
+
+![](images/co2.trends.png) *Mauna Loa Observatory, Hawaii. The sawtooth fluctuations illustrate the overall trend and yearly seasonality of carbon dioxide concentration in the atmosphere. Data from the Scripps CO2 programme.*
+
+For students wishing to use an engaging and interactive plot of the forecast to play around with, we can use the R command below:
+
+```{r eval=FALSE, include=TRUE}
+dyplot.prophet(modelwithnoseasonality,predict)
+```
